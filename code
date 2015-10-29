@@ -1,0 +1,791 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package trouble;
+
+
+import static trouble.Trouble.WINDOW_BORDER;
+import java.io.*;
+import java.awt.*;
+import java.awt.geom.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class Trouble extends JFrame implements Runnable {
+    static final int XBORDER = 20;
+    static final int YBORDER = 20;
+    static final int YTITLE = 30;
+    static final int WINDOW_BORDER = 8;
+    static final int WINDOW_WIDTH = 2*(WINDOW_BORDER + XBORDER) + 882;
+    static final int WINDOW_HEIGHT = YTITLE + WINDOW_BORDER + 2 * YBORDER + 882;
+    boolean animateFirstTime = true;
+    int xsize = -1;
+    int ysize = -1;
+    Image image;
+    Graphics2D g;
+
+    final int numRows = 21;
+    final int numColumns = 21;
+    PieceRev board[][];
+    boolean playerOnesTurn;
+    boolean moveHappened;
+    int currentRow;
+    int currentColumn;
+    boolean test2 = false;
+    enum WinState
+    {
+        None,PlayerOne,PlayerTwo,Tie
+    }
+    Trouble.WinState winState;
+    int winRow;
+    int winColumn;
+    enum WinDirection
+    {
+        Horizontal,Vertical,DiagonalUp,DiagonalDown
+    }
+    Trouble.WinDirection winDirection;    
+    int piecesOnBoard;
+    
+    boolean test;
+    int winnervalue = 0;
+    
+    static Trouble frame1;
+    public static void main(String[] args) {
+        frame1 = new Trouble();
+        frame1.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame1.setVisible(true);
+    }
+
+    public Trouble() {
+
+        addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                if (e.BUTTON1 == e.getButton()) {
+                    //left button
+//                    if (moveHappened || winState != Trouble.WinState.None)
+//                        return;
+//                    
+//                    
+//                    int xpos = e.getX() - getX(0);
+//                    int ypos = e.getY() - getY(0);
+//                    if (xpos < 0 || ypos < 0 || xpos > getWidth2() || ypos > getHeight2())
+//                        return;
+////Calculate the width and height of each board square.
+//                    int ydelta = getHeight2()/numRows;
+//                    int xdelta = getWidth2()/numColumns;
+//                    currentColumn = xpos/xdelta;
+////                    int row = ypos/ydelta;
+//                    currentRow = numRows - 1;
+//                    while (currentRow >= 0 && board[currentRow][currentColumn] != null)
+//                    {
+//                        currentRow--;
+//                    }
+//                    if (currentRow >= 0)
+//                    {
+//                        if (playerOnesTurn)
+//                            board[currentRow][currentColumn] = new PieceRev(Color.red,(int)((Math.random()*4)+1), true);
+//                        else
+//                            board[currentRow][currentColumn] = new PieceRev(Color.black,(int)((Math.random()*4)+1), true);
+//                        playerOnesTurn = !playerOnesTurn;
+//                        moveHappened = true;
+//                        piecesOnBoard++;
+//                    }
+                }
+                if (e.BUTTON3 == e.getButton()) {
+                    //right button
+//                    if (moveHappened || winState != Trouble.WinState.None)
+//                        return;
+//                    
+//                    int xpos = e.getX() - getX(0);
+//                    int ypos = e.getY() - getY(0);
+//                    if (xpos < 0 || ypos < 0 || xpos > getWidth2() || ypos > getHeight2())
+//                        return;
+//                    
+//                    
+//                    
+//                    int ydelta = getHeight2()/numRows;
+//                    int xdelta = getWidth2()/numColumns;
+//                    currentColumn = xpos/xdelta;
+////                    int row = ypos/ydelta;
+//                    currentRow = numRows - 1;
+//                    while (currentRow >= 0 && board[currentRow][currentColumn] != null)
+//                    {
+//                        currentRow--;
+//                    }
+//                    if (currentRow >= 0)
+//                    {
+//                        if (playerOnesTurn)
+//                        {
+//                            int detect = 1;
+//                            boolean done = false;
+//                            while (done == false && currentRow + detect <= numRows-1 && board[currentRow+detect][currentColumn] != null)
+//                            {    
+//                                if (board[currentRow+detect][currentColumn].getColor() == Color.black)
+//                                {
+//                                board[currentRow+detect][currentColumn].setColor(Color.orange);
+//                                board[currentRow+detect][currentColumn].setusable(false);
+//                                board[currentRow+detect][currentColumn].setvalue(0);
+//                                done = true;
+//                                test2 = true;
+//                                }
+//                                detect ++;
+//                            }
+//                        }
+//                        else if (playerOnesTurn == false)
+//                        {
+//                            int detect = 1;
+//                            boolean done = false;
+//                            while (done == false && currentRow + detect <= numRows-1 && board[currentRow+detect][currentColumn] != null)
+//                            {  
+//                                if (board[currentRow+detect][currentColumn].getColor() == Color.red)
+//                                {
+//                                board[currentRow+detect][currentColumn].setColor(Color.orange);
+//                                board[currentRow+detect][currentColumn].setusable(false);
+//                                board[currentRow+detect][currentColumn].setvalue(0);
+//                                done = true;
+//                                test2 = true;
+//                                }
+//                                 detect ++;
+//                            }
+//                        }
+//                        
+//                        if (test2 == true)
+//                        {
+//                        playerOnesTurn = !playerOnesTurn;
+//                        test2 = false;
+//                        }
+//                        moveHappened = true;
+//                        test = true;
+//                    }
+                    
+                    
+                }
+                repaint();
+            }
+        });
+
+    addMouseMotionListener(new MouseMotionAdapter() {
+      public void mouseDragged(MouseEvent e) {
+        repaint();
+      }
+    });
+
+    addMouseMotionListener(new MouseMotionAdapter() {
+      public void mouseMoved(MouseEvent e) {
+        repaint();
+      }
+    });
+
+        addKeyListener(new KeyAdapter() {
+
+            public void keyPressed(KeyEvent e) {
+                if (e.VK_RIGHT == e.getKeyCode())
+                {
+                }
+                if (e.VK_LEFT == e.getKeyCode())
+                {
+                }
+                if (e.VK_UP == e.getKeyCode())
+                {
+                }
+                if (e.VK_DOWN == e.getKeyCode())
+                {
+                }
+                if (e.VK_R == e.getKeyCode())
+                {
+                    reset();
+                }
+
+                repaint();
+            }
+        });
+        init();
+        start();
+    }
+
+
+
+
+    Thread relaxer;
+////////////////////////////////////////////////////////////////////////////
+    public void init() {
+        requestFocus();
+    }
+////////////////////////////////////////////////////////////////////////////
+    public void destroy() {
+    }
+////////////////////////////////////////////////////////////////////////////
+    public void paint(Graphics gOld) {
+        if (image == null || xsize != getSize().width || ysize != getSize().height) {
+            xsize = getSize().width;
+            ysize = getSize().height;
+            image = createImage(xsize, ysize);
+            g = (Graphics2D) image.getGraphics();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+
+//fill background
+        g.setColor(Color.cyan);
+
+        g.fillRect(0, 0, xsize, ysize);
+
+        int x[] = {getX(0), getX(getWidth2()), getX(getWidth2()), getX(0), getX(0)};
+        int y[] = {getY(0), getY(0), getY(getHeight2()), getY(getHeight2()), getY(0)};
+//fill border
+        g.setColor(Color.white);
+        g.fillPolygon(x, y, 4);
+// draw border
+        g.setColor(Color.red);
+        g.drawPolyline(x, y, 5);
+
+        if (animateFirstTime) {
+            gOld.drawImage(image, 0, 0, null);
+            return;
+        }
+
+        g.setColor(Color.gray);
+//horizontal lines
+        for (int zi=1;zi<numRows;zi++)
+        {
+            g.drawLine(getX(0) ,getY(0)+zi*getHeight2()/numRows ,
+            getX(getWidth2()) ,getY(0)+zi*getHeight2()/numRows );
+        }
+//vertical lines
+        for (int zi=1;zi<numColumns;zi++)
+        {
+            g.drawLine(getX(0)+zi*getWidth2()/numColumns ,getY(0) ,
+            getX(0)+zi*getWidth2()/numColumns,getY(getHeight2())  );
+        }
+
+//        for (int zrow=0;zrow<numRows;zrow++)
+//        {
+//            for (int zcolumn=0;zcolumn<numColumns;zcolumn++)
+//            {
+//                if (board[zrow][zcolumn] != null)
+//                {
+//                    if (board[zrow][zcolumn].getusable()==true)
+//                    {
+//                    g.setColor(board[zrow][zcolumn].getColor());
+////                    g.fillOval(getX(0)+zcolumn*getWidth2()/numColumns,
+////                    getY(0)+zrow*getHeight2()/numRows,
+////                    getWidth2()/numColumns,
+////                    getHeight2()/numRows);
+//                    
+//                    drawPiece(getX(0)+zcolumn*getWidth2()/numColumns,getY(0)+zrow*getHeight2()/numRows+getHeight2()/numRows,0,getWidth2()/numColumns,getHeight2()/numRows);
+//                    
+//                    g.setColor(Color.DARK_GRAY);
+//                    g.drawString(""+board[zrow][zcolumn].getvalue(), getX(0)+zcolumn*getWidth2()/numColumns+getWidth2()/numColumns/2,
+//                    getY(0)+zrow*getHeight2()/numRows+getHeight2()/numRows/2); 
+//                    }
+//                }
+//            }
+//        }
+//        
+        for (int zrow=0;zrow<numRows;zrow++)
+        {
+            for (int zcolumn=0;zcolumn<numColumns;zcolumn++)
+            {
+                if (board[zrow][zcolumn] != null)
+                {
+//                    if (board[zrow][zcolumn].getusable()==false)
+//                    {
+                    g.setColor(board[zrow][zcolumn].getColor());
+                    g.fillRect(getX(0)+zcolumn*getWidth2()/numColumns,
+                    getY(0)+zrow*getHeight2()/numRows,
+                    getWidth2()/numColumns,
+                    getHeight2()/numRows);
+//                    }
+                }
+            }
+        }
+//        
+//        if (winState == Trouble.WinState.PlayerOne)
+//        {
+//            g.setColor(Color.gray);
+//            g.setFont(new Font("Monospaced",Font.BOLD,30) );
+//            g.drawString("Player 1 has won with: " + winnervalue, 50, 200);            
+//        }
+//        else if (winState == Trouble.WinState.PlayerTwo)
+//        {
+//            g.setColor(Color.gray);
+//            g.setFont(new Font("Monospaced",Font.BOLD,30) );
+//            g.drawString("Player 2 has won with: " + winnervalue, 50, 200);            
+//        }
+//        else if (winState == Trouble.WinState.Tie)
+//        {
+//            g.setColor(Color.gray);
+//            g.setFont(new Font("Monospaced",Font.BOLD,30) );
+//            g.drawString("It is a tie.", 50, 200);            
+//        }
+
+        gOld.drawImage(image, 0, 0, null);
+    }
+
+//////////////////////////////////////////////////////////////////////////////
+    public void drawPiece(int xpos,int ypos,double rot,double xscale,double yscale)
+    {
+        g.translate(xpos,ypos);
+        g.rotate(rot  * Math.PI/180.0);
+        g.scale( xscale , yscale );
+
+        int xval[] = {0,1,0,0};
+        int yval[] = {0,0,-1,0};
+        g.fillPolygon(xval,yval,xval.length);
+        
+        g.scale( 1.0/xscale,1.0/yscale );
+        g.rotate(-rot  * Math.PI/180.0);
+        g.translate(-xpos,-ypos);
+    }
+////////////////////////////////////////////////////////////////////////////
+// needed for     implement runnable
+    public void run() {
+        while (true) {
+            animate();
+            repaint();
+            double seconds = 0.03;    //time that 1 frame takes.
+            int miliseconds = (int) (1000.0 * seconds);
+            try {
+                Thread.sleep(miliseconds);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+/////////////////////////////////////////////////////////////////////////
+    public void reset() {
+        board = new PieceRev[numRows][numColumns];
+        for (int zrow = 0;zrow < numRows;zrow++)
+        {
+            for (int zcolumn = 0;zcolumn < numColumns;zcolumn++)
+            {
+                board[0][0] = new PieceRev(Color.green);
+                board[0][1] = new PieceRev(Color.green);
+                board[0][2] = new PieceRev(Color.green);
+                board[0][3] = new PieceRev(Color.green);
+                board[0][4] = new PieceRev(Color.green);
+                board[0][5] = new PieceRev(Color.green);
+                board[0][6] = new PieceRev(Color.green);
+                board[6][0] = new PieceRev(Color.green);
+                board[6][1] = new PieceRev(Color.green);
+                board[6][2] = new PieceRev(Color.green);
+                board[6][3] = new PieceRev(Color.green);
+                board[6][4] = new PieceRev(Color.green);
+                board[6][5] = new PieceRev(Color.green);
+                board[1][0] = new PieceRev(Color.green);
+                board[2][0] = new PieceRev(Color.green);
+                board[3][0] = new PieceRev(Color.green);
+                board[4][0] = new PieceRev(Color.green);
+                board[5][0] = new PieceRev(Color.green);
+                board[1][6] = new PieceRev(Color.green);
+                board[2][6] = new PieceRev(Color.green);
+                board[3][6] = new PieceRev(Color.green);
+                board[4][6] = new PieceRev(Color.green);
+                board[5][6] = new PieceRev(Color.green);
+                board[6][6] = new PieceRev(Color.green);
+                
+                board[4][4] = new PieceRev(Color.green);
+                board[4][2] = new PieceRev(Color.green);
+                board[2][2] = new PieceRev(Color.green);
+                board[2][4] = new PieceRev(Color.green);
+                
+                
+                board[0][14] = new PieceRev(Color.red);
+                board[0][15] = new PieceRev(Color.red);
+                board[0][16] = new PieceRev(Color.red);
+                board[0][17] = new PieceRev(Color.red);
+                board[0][18] = new PieceRev(Color.red);
+                board[0][19] = new PieceRev(Color.red);
+                board[0][20] = new PieceRev(Color.red);
+                board[6][14] = new PieceRev(Color.red);
+                board[6][15] = new PieceRev(Color.red);
+                board[6][16] = new PieceRev(Color.red);
+                board[6][17] = new PieceRev(Color.red);
+                board[6][18] = new PieceRev(Color.red);
+                board[6][19] = new PieceRev(Color.red);
+                board[1][14] = new PieceRev(Color.red);
+                board[2][14] = new PieceRev(Color.red);
+                board[3][14] = new PieceRev(Color.red);
+                board[4][14] = new PieceRev(Color.red);
+                board[5][14] = new PieceRev(Color.red);
+                board[1][20] = new PieceRev(Color.red);
+                board[2][20] = new PieceRev(Color.red);
+                board[3][20] = new PieceRev(Color.red);
+                board[4][20] = new PieceRev(Color.red);
+                board[5][20] = new PieceRev(Color.red);
+                board[6][20] = new PieceRev(Color.red);
+                
+                board[4][18] = new PieceRev(Color.red);
+                board[4][16] = new PieceRev(Color.red);
+                board[2][16] = new PieceRev(Color.red);
+                board[2][18] = new PieceRev(Color.red);
+                
+                
+                board[14][14] = new PieceRev(Color.blue);
+                board[15][15] = new PieceRev(Color.blue);
+                board[16][16] = new PieceRev(Color.blue);
+                board[17][17] = new PieceRev(Color.blue);
+                board[18][18] = new PieceRev(Color.blue);
+                board[19][19] = new PieceRev(Color.blue);
+                board[20][20] = new PieceRev(Color.blue);
+                board[14][14] = new PieceRev(Color.blue);
+                board[14][15] = new PieceRev(Color.blue);
+                board[14][16] = new PieceRev(Color.blue);
+                board[14][17] = new PieceRev(Color.blue);
+                board[14][18] = new PieceRev(Color.blue);
+                board[14][20] = new PieceRev(Color.blue);
+                board[16][14] = new PieceRev(Color.blue);
+                board[17][14] = new PieceRev(Color.blue);
+                board[18][14] = new PieceRev(Color.blue);
+                board[19][14] = new PieceRev(Color.blue);
+                board[20][14] = new PieceRev(Color.blue);
+                board[15][20] = new PieceRev(Color.blue);
+                board[16][20] = new PieceRev(Color.blue);
+                board[17][20] = new PieceRev(Color.blue);
+                board[18][20] = new PieceRev(Color.blue);
+                board[19][20] = new PieceRev(Color.blue);
+                board[20][20] = new PieceRev(Color.blue);
+                
+                board[16][18] = new PieceRev(Color.blue);
+                board[16][16] = new PieceRev(Color.blue);
+                board[18][16] = new PieceRev(Color.blue);
+                board[18][18] = new PieceRev(Color.blue);
+            }
+        }
+        
+        playerOnesTurn = true;
+        moveHappened = false;
+        winState = Trouble.WinState.None;
+        piecesOnBoard = 0;
+        test = false;
+    }
+/////////////////////////////////////////////////////////////////////////
+    public void animate() {
+
+        if (animateFirstTime) {
+            animateFirstTime = false;
+            if (xsize != getSize().width || ysize != getSize().height) {
+                xsize = getSize().width;
+                ysize = getSize().height;
+            }
+
+            reset();
+        }
+        
+        
+        if (moveHappened)
+        {
+            moveHappened = false;
+            if (test == true);
+            {
+            //checkWin();
+            test = false;
+            }
+            
+        }
+    }
+////////////////////////////////////////////////////////////////////////////
+//    public boolean checkWin() {
+//        
+//        int nummatches = 4;
+//        
+//        
+//
+//        
+//        
+////check horizontal.
+//        if (test == false)
+//        {
+//        
+//        int startColumn = currentColumn - 3;
+//        if (startColumn < 0)
+//            startColumn = 0;
+//        int endColumn = currentColumn + 3;
+//        if (endColumn > numColumns-1)
+//            endColumn = numColumns - 1;
+//        int numMatch = 0;
+//        
+//
+//        
+//            for (int col = startColumn;numMatch != nummatches && col<=endColumn;col++)
+//            {
+//                if (board[currentRow][col] != null && board[currentRow][col].getColor() == board[currentRow][currentColumn].getColor())
+//                    numMatch++;
+//                else
+//                    numMatch = 0;
+//                if (numMatch == 1)
+//                {
+//                    winColumn = col;
+//                    winRow = currentRow;
+//                }
+//            }
+//
+//            if (numMatch == nummatches)
+//            {
+//                if (board[currentRow][currentColumn].getColor() == Color.red)
+//                    winState = Trouble.WinState.PlayerOne;
+//                else
+//                    winState = Trouble.WinState.PlayerTwo;
+//                {
+//                    for (int times = 0;times < nummatches;times++)
+//                    {
+//                    board[winRow][winColumn+times].setColor(Color.blue);
+//                    winnervalue += board[winRow][winColumn+times].getvalue();
+//                    }
+//
+//                }            
+//                return (true);
+//            }
+//
+//    //check vertical.
+//            int startRow = currentRow - 3;
+//            if (startRow < 0)
+//                startRow = 0;
+//            int endRow = currentRow + 3;
+//            if (endRow > numRows-1)
+//                endRow = numRows - 1;
+//            numMatch = 0;
+//
+//            winnervalue = 0;
+//
+//            for (int row = startRow;numMatch != nummatches && row<=endRow;row++)
+//            {
+//                if (board[row][currentColumn] != null && board[row][currentColumn].getColor() == board[currentRow][currentColumn].getColor())
+//                    numMatch++;
+//                else
+//                    numMatch = 0;
+//                if (numMatch == 1)
+//                {
+//                    winColumn = currentColumn;
+//                    winRow = row;
+//                }            
+//            }
+//
+//            if (numMatch == nummatches)
+//            {
+//                if (board[currentRow][currentColumn].getColor() == Color.red)
+//                    winState = Trouble.WinState.PlayerOne;
+//                else
+//                    winState = Trouble.WinState.PlayerTwo;
+//                {
+//                    for (int times = 0;times < nummatches;times++)
+//                    {
+//                    board[winRow+times][winColumn].setColor(Color.blue);
+//                    winnervalue += board[winRow+times][winColumn].getvalue();
+//                    }
+//                }             
+//                return (true);
+//            }        
+//    //check diagonal right down.
+//            startColumn = currentColumn - 3;
+//            startRow = currentRow - 3;
+//            if (startColumn < 0 || startRow < 0)
+//            {
+//                if (startColumn < startRow)
+//                {
+//                    startRow -= startColumn;
+//                    startColumn = 0;
+//                }
+//                else
+//                {
+//                    startColumn -= startRow;
+//                    startRow = 0;
+//                }
+//            }
+//            endColumn = currentColumn + 3;
+//            endRow = currentRow + 3;
+//            if (endColumn > numColumns-1 || endRow > numRows-1)
+//            {
+//                if (endColumn > endRow)
+//                {
+//                    endRow -= (endColumn - (numColumns - 1));
+//                    endColumn = numColumns-1;
+//                }
+//                else
+//                {
+//                    endColumn -= (endRow - (numRows - 1));
+//                    endRow = numRows-1;
+//                }
+//            }
+//
+//            numMatch = 0;    
+//            int row = startRow;
+//            for (int col = startColumn;numMatch != nummatches && col<=endColumn;col++)
+//            {
+//                if (board[row][col] != null && board[row][col].getColor() == board[currentRow][currentColumn].getColor())
+//                    numMatch++;
+//                else
+//                    numMatch = 0;
+//                if (numMatch == 1)
+//                {
+//                    winColumn = col;
+//                    winRow = row;
+//                }
+//                row++;
+//            }
+//            winnervalue = 0;
+//            if (numMatch == nummatches)
+//            {
+//                if (board[currentRow][currentColumn].getColor() == Color.red)
+//                    winState = Trouble.WinState.PlayerOne;
+//                else
+//                    winState = Trouble.WinState.PlayerTwo;
+//                {
+//                    for (int times = 0;times < nummatches;times++)
+//                    {
+//                    board[winRow+times][winColumn+times].setColor(Color.blue);
+//                    winnervalue += board[winRow+times][winColumn+times].getvalue();
+//                    }
+//                }            
+//                return (true);
+//            }
+//
+//
+//    //check diagonal right up.
+//            startColumn = currentColumn - 3;
+//            startRow = currentRow + 3;
+//            if (startColumn < 0 || startRow > numRows-1)
+//            {
+//                if (startColumn < numRows - 1 - startRow)
+//                {
+//                    startRow += startColumn;
+//                    startColumn = 0;
+//                }
+//                else
+//                {
+//                    startColumn += startRow - (numRows - 1);
+//                    startRow = numRows - 1;
+//                }
+//            }
+//            endRow = currentRow - 3;
+//            endColumn = currentColumn + 3;
+//            if (endRow < 0 || endColumn > numColumns-1)
+//            {
+//                if (endRow < numColumns - 1 - endColumn)
+//                {
+//                    endColumn += endRow;
+//                    endRow = 0;
+//                }
+//                else
+//                {
+//                    endRow += endColumn - (numColumns - 1);
+//                    endColumn = numColumns - 1;
+//                }
+//            }        
+//
+//            numMatch = 0;    
+//            row = startRow;
+//            for (int col = startColumn;numMatch != nummatches && col<=endColumn;col++)
+//            {
+//                if (board[row][col] != null && board[row][col].getColor() == board[currentRow][currentColumn].getColor())
+//                    numMatch++;
+//                else
+//                    numMatch = 0;
+//                if (numMatch == 1)
+//                {
+//                    winColumn = col;
+//                    winRow = row;
+//                }
+//                row--;
+//            }
+//            winnervalue = 0;
+//            if (numMatch == nummatches)
+//            {
+//                if (board[currentRow][currentColumn].getColor() == Color.red)
+//                    winState = Trouble.WinState.PlayerOne;
+//                else
+//                    winState = Trouble.WinState.PlayerTwo;
+//                {
+//                    for (int times = 0;times < nummatches;times++)
+//                    {
+//                    board[winRow-times][winColumn+times].setColor(Color.blue);
+//                    winnervalue += board[winRow-times][winColumn+times].getvalue();
+//                    }
+//                }            
+//                return (true);
+//            }
+//
+//            if (piecesOnBoard >= numRows*numColumns)
+//            {
+//                winState = Trouble.WinState.Tie;
+//                return(true);
+//            }
+//        }
+//        return(false);
+//    }
+////////////////////////////////////////////////////////////////////////////
+    public void start() {
+        if (relaxer == null) {
+            relaxer = new Thread(this);
+            relaxer.start();
+        }
+    }
+////////////////////////////////////////////////////////////////////////////
+    public void stop() {
+        if (relaxer.isAlive()) {
+            relaxer.stop();
+        }
+        relaxer = null;
+    }
+/////////////////////////////////////////////////////////////////////////
+    public int getX(int x) {
+        return (x + XBORDER + WINDOW_BORDER);
+    }
+
+    public int getY(int y) {
+        return (y + YBORDER + YTITLE );
+    }
+
+    public int getYNormal(int y) {
+        return (-y + YBORDER + YTITLE + getHeight2());
+    }
+    
+    public int getWidth2() {
+        return (xsize - 2 * (XBORDER + WINDOW_BORDER));
+    }
+
+    public int getHeight2() {
+        return (ysize - 2 * YBORDER - WINDOW_BORDER - YTITLE);
+    }
+}
+
+class PieceRev {
+    private Color color;
+    //private int value;
+    //private boolean unusable;
+    PieceRev(Color _color/*, int _value, boolean _unusable*/)
+    {
+        color = _color;
+        //value = _value;
+        //unusable = _unusable;
+    }
+    Color getColor()
+    {
+        return (color);
+    }
+    void setColor(Color _color)
+    {
+        color = _color;
+    }  
+//    int getvalue()
+//    {
+//        return (value);
+//    }
+//    void setvalue(int _value)
+//    {
+//        value = _value;
+//    }
+//    void setColor(int _value)
+//    {
+//        value = _value;
+//    } 
+//    boolean getusable()
+//    {
+//        return (unusable);
+//    }
+//    void setusable(boolean _unusable)
+//    {
+//        unusable = _unusable;
+//    } 
+}
